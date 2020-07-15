@@ -110,10 +110,10 @@ func TestAvlTreeRemoveRootNode(t *testing.T) {
 
 func TestAvlTreeRemoveNodeWithTwoChildren(t *testing.T) {
     //        2               3
-	//       / \             / \
-	//      1   4   ---->   1   4  
-	//         /
-	//        3
+    //       / \             / \
+    //      1   4   ---->   1   4  
+    //         /
+    //        3
 	var tree *AVLTree = NewAvlTree()
 	var vp1 *VirtualPoint = NewVirtualPoint("127.0.0.1", "1")
 	var vp2 *VirtualPoint = NewVirtualPoint("127.0.0.2", "2")
