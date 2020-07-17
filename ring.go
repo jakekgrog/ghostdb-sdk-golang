@@ -51,7 +51,9 @@ func NewRing(clusterConfig string, replicas int) *Ring {
 		replicas: replicas,
 		ring: NewAvlTree(),
 	}
-	ring.initRing(clusterConfig)
+	if clusterConfig != "" {
+		ring.initRing(clusterConfig)
+	}
 	return ring
 }
 
@@ -69,6 +71,23 @@ func (this *Ring) Delete(node string) {
 		index = keyHash(node, i)
 		this.ring.RemoveNode(index)
 	}
+}
+
+func (this *Ring) GetPoint(key string) *Pair {
+	var ringSize int = len(this.ring.InOrderTraverse())
+	if ringSize == 0 {
+		return nil
+	}
+	var index string = keyHash(key)
+	var node *Pair = this.ring.NextPair(index)
+	if node == nil {
+		node = this.ring.MinPair()
+	}
+	return node
+}
+
+func (this *Ring) GetPoints() []*VirtualPoint {
+	return this.ring.GetNodes()
 }
 
 func (this *Ring) initRing(clusterConfig string) {

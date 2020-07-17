@@ -47,3 +47,41 @@ func TestKeyHash(t *testing.T) {
 	expectedHash = "8eda8641"
 	AssertEqual(t, hash, expectedHash, "")
 }
+
+func TestRingAddNode(t *testing.T) {
+	ring := NewRing("", 1)
+
+	ring.Add("10.23.20.2") // Hash Key - 0xd80ceccd
+	ring.Add("10.23.34.4") // Hash Key - 0x8eda8641
+	key1 := "TEST_KEY"     // Hash Key - 0x2269b0e
+	key2 := "ANOTHER_KEY"  // Hash Key - 0xd3918bd2
+
+	node := ring.GetPoint(key1)
+	AssertEqual(t, node.value.ip, "10.23.34.4", "")
+
+	node = ring.GetPoint(key2)
+	AssertEqual(t, node.value.ip, "10.23.20.2", "")
+}
+
+func TestRingDeleteNode(t *testing.T) {
+	ring := NewRing("", 1)
+
+	ring.Add("10.23.20.2") // Hash Key - 0xd80ceccd
+	ring.Add("10.23.34.4") // Hash Key - 0x8eda8641
+	key1 := "TEST_KEY"     // Hash Key - 0x2269b0e
+	key2 := "ANOTHER_KEY"  // Hash Key - 0xd3918bd2
+
+	ring.Delete("10.23.20.2")
+	node := ring.GetPoint(key1)
+	AssertEqual(t, node.value.ip, "10.23.34.4", "")
+
+	node = ring.GetPoint(key2)
+	AssertEqual(t, node.value.ip, "10.23.34.4", "")
+}
+
+func TestRingInitFromConfig(t *testing.T) {
+	ring := NewRing("./testconfig.conf", 1)
+	nodes := ring.GetPoints()
+	AssertEqual(t, nodes[0].index, "95412376", "")
+	AssertEqual(t, nodes[1].index, "af102aa1", "")
+}
