@@ -39,6 +39,16 @@ type Params struct {
 	output []string
 }
 
+type GetVpParams struct {
+	node   *Node
+	output []*VirtualPoint
+}
+
+type Pair struct {
+	index string
+	value *VirtualPoint
+}
+
 type AVLTree struct {
 	node *Node
 	height int
@@ -94,6 +104,71 @@ func (this *AVLTree) RemoveNode(index string) {
 		}
 		this.rebalance()
 	}
+}
+
+func (this *AVLTree) GetNodes() []*VirtualPoint {
+	var root *Node = this.node
+	var nodes []*VirtualPoint = getVirtualPoints(&GetVpParams{node: root, output: nil})
+	return nodes
+}
+
+func getVirtualPoints(params *GetVpParams) []*VirtualPoint {
+	if params.node != nil {
+		var curr *Node = params.node
+		
+		params.node = curr.left.node
+		getVirtualPoints(params)
+
+		params.output = append(params.output, curr.vp)
+		
+		params.node = curr.right.node
+		getVirtualPoints(params)
+
+		
+	}
+	return params.output
+}
+
+func (this *AVLTree) MinPair() *Pair {
+	if this.node == nil {
+		return nil
+	}
+	var currentNode *Node = this.node
+	for currentNode.left.node != nil {
+		currentNode = currentNode.left.node
+	}
+	return &Pair{index: currentNode.index, value: currentNode.vp}
+}
+
+func (this *AVLTree) NextPair(index string) *Pair {
+	var node *Node = getNextPair(this.node, index)
+	if node == nil {
+		return nil
+	}
+	var pair *Pair = &Pair{index: node.index, value: node.vp}
+	return pair
+}
+
+func getNextPair(node *Node, index string) *Node {
+	var after *Node
+	if node == nil {
+		return nil
+	}
+	if index < node.index {
+		if node.left != nil {
+			after = getNextPair(node.left.node, index)
+			if after == nil {
+				after = node
+			}
+		}
+	} else if index > node.index {
+		if node.right != nil {
+			after = getNextPair(node.right.node, index)
+		}
+	} else if node.index == index {
+		after = node
+	}
+	return after
 }
 
 func (this *AVLTree) InOrderTraverse() []string {

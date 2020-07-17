@@ -183,3 +183,68 @@ func TestAvlTreePostOrderTraverse(t *testing.T) {
 	var expectedOutput []string = []string{"1", "3", "4", "2"}
 	AssertEqual(t, expectedOutput[0], output[0], "")
 }
+
+func TestAvlTreeGetNodes(t *testing.T) {
+	var tree *AVLTree = NewAvlTree()
+	var vp1 *VirtualPoint = NewVirtualPoint("127.0.0.1", "1")
+	var vp2 *VirtualPoint = NewVirtualPoint("127.0.0.2", "2")
+	var vp3 *VirtualPoint = NewVirtualPoint("127.0.0.3", "3")
+	var vp4 *VirtualPoint = NewVirtualPoint("127.0.0.4", "4")
+
+	tree.InsertNode("4", vp4)
+	tree.InsertNode("2", vp2)
+	tree.InsertNode("1", vp1)
+	tree.InsertNode("3", vp3)
+	
+	output := tree.GetNodes()
+
+	AssertEqual(t, len(output), 4, "")
+
+	// GetNodes() fetches nodes in in-order order
+	var expectedIndexes []string = []string{"1", "2", "3", "4"}
+	for i, vp := range output {
+		AssertEqual(t, vp.index, expectedIndexes[i], "")
+	}
+}
+
+func TestAvlTreeGetMinPair(t *testing.T) {
+	var tree *AVLTree = NewAvlTree()
+	var vp1 *VirtualPoint = NewVirtualPoint("10.128.20.1", "1")
+	var vp2 *VirtualPoint = NewVirtualPoint("10.128.20.2", "2")
+	var vp3 *VirtualPoint = NewVirtualPoint("10.128.20.3", "3")
+	var vp4 *VirtualPoint = NewVirtualPoint("10.128.20.4", "4")
+	var vp5 *VirtualPoint = NewVirtualPoint("10.128.20.5", "5")
+	var vp6 *VirtualPoint = NewVirtualPoint("10.128.20.6", "6")
+
+	tree.InsertNode("1", vp1)
+	tree.InsertNode("2", vp2)
+	tree.InsertNode("3", vp3)
+	tree.InsertNode("4", vp4)
+	tree.InsertNode("5", vp5)
+	tree.InsertNode("6", vp6)
+
+	node := tree.MinPair()
+	AssertEqual(t, node.index, "1", "")
+}
+
+func TestAvlTreeGetNextPair(t *testing.T) {
+	var tree *AVLTree = NewAvlTree()
+	var vp1 *VirtualPoint = NewVirtualPoint("10.128.20.1", "1")
+	var vp2 *VirtualPoint = NewVirtualPoint("10.128.20.2", "2")
+	var vp3 *VirtualPoint = NewVirtualPoint("10.128.20.3", "3")
+	var vp4 *VirtualPoint = NewVirtualPoint("10.128.20.4", "4")
+	var vp5 *VirtualPoint = NewVirtualPoint("10.128.20.5", "5")
+
+	// Skip "6"
+	var vp6 *VirtualPoint = NewVirtualPoint("10.128.20.6", "7")
+
+	tree.InsertNode("1", vp1)
+	tree.InsertNode("2", vp2)
+	tree.InsertNode("3", vp3)
+	tree.InsertNode("4", vp4)
+	tree.InsertNode("5", vp5)
+	tree.InsertNode("7", vp6) // "6" skipped
+
+	node := tree.NextPair("6")
+	AssertEqual(t, node.index, "7", "")
+}

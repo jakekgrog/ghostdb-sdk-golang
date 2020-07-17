@@ -46,7 +46,7 @@ type Ring struct {
 	ring     *AVLTree
 }
 
-func NewRing(clusterConfig string, replicas int) {
+func NewRing(clusterConfig string, replicas int) *Ring {
 	var ring *Ring = &Ring{
 		replicas: replicas,
 		ring: NewAvlTree(),
@@ -59,7 +59,7 @@ func (this *Ring) Add(node string) {
 	for i := 0; i < this.replicas; i++ {
 		var index string = keyHash(node, i)
 		var vp *VirtualPoint = NewVirtualPoint(node, index)
-		this.ring.insertNode(index, vp)
+		this.ring.InsertNode(index, vp)
 	}
 }
 
