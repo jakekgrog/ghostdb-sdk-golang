@@ -30,47 +30,16 @@
 
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"reflect"
-	"testing"
-)
-
-func AssertEqual(t *testing.T, a interface{}, b interface{}, message string) {
-	if a == b {
-		t.Logf("TEST PASSED")
-		return
-	}
-	if len(message) == 0 {
-		message = fmt.Sprintf("%v != %v", a, b)
-	}
-	t.Fatal(message)
+type GhostObject struct {
+	Key   string
+	Value interface{}
+	TTL int
 }
 
-func AssertDeepEqual(t *testing.T, a interface{}, b interface{}, message string) {
-	if reflect.DeepEqual(a, b) {
-		t.Logf("TEST PASSED")
-		return
+func NewGhostObject(params CacheRequestParams) GhostObject {
+	return GhostObject{
+		Key: params.Key,
+		Value: params.Value,
+		TTL: params.TTL,
 	}
-	if len(message) == 0 {
-		message = fmt.Sprintf("%v != %v", a, b)
-	}
-	t.Fatal(message)
-}
-
-func readFileByLine(filename string) ([]string, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	return lines, scanner.Err()
 }

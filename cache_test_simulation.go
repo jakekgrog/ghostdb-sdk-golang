@@ -31,46 +31,81 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
-	"reflect"
 	"testing"
 )
 
-func AssertEqual(t *testing.T, a interface{}, b interface{}, message string) {
-	if a == b {
-		t.Logf("TEST PASSED")
-		return
-	}
-	if len(message) == 0 {
-		message = fmt.Sprintf("%v != %v", a, b)
-	}
-	t.Fatal(message)
-}
+func TestCache(t *testing.T) {
+	cache := NewCache("simulation.conf", true, "7991")
 
-func AssertDeepEqual(t *testing.T, a interface{}, b interface{}, message string) {
-	if reflect.DeepEqual(a, b) {
-		t.Logf("TEST PASSED")
-		return
-	}
-	if len(message) == 0 {
-		message = fmt.Sprintf("%v != %v", a, b)
-	}
-	t.Fatal(message)
-}
-
-func readFileByLine(filename string) ([]string, error) {
-	file, err := os.Open(filename)
+	// TEST CORRECT RESPONSE WHEN CACHE EMPTY
+	response, err := cache.Get("Test")
 	if err != nil {
-		return nil, err
+		t.Fatal(err.Error())
+	} else {
+		AssertEqual(t, response.Message, "CACHE_MISS", "")
 	}
-	defer file.Close()
 
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+	// TEST THERE ARE NO KEY/VALUE PAIRS IN THE CACHE
+	response, err = cache.NodeSize("127.0.0.1")
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		AssertEqual(t, response.Gobj.Value, float64(0), "")
 	}
-	return lines, scanner.Err()
+
+	// TEST ADD
+	response, err = cache.Add("Ireland", "Dublin", -1)
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		AssertEqual(t, response.Status, int32(1), "")
+	}
+
+	// TEST ADD WORKED
+	response, err = cache.Get("Ireland")
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		AssertEqual(t, response.Gobj.Value, "Dublin", "")
+	}
+
+	// TEST PUT
+	response, err = cache.Put("Ireland", "Not Dublin", -1)
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		AssertEqual(t, response.Status, int32(1), "")
+	}
+
+	// TEST PUT WORKED
+	response, err = cache.Get("Ireland")
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		AssertEqual(t, response.Gobj.Value, "Not Dublin", "")
+	}
+
+	// TEST GET SYS METRICS - ONLY REACHABLE SERVERS IN DATA
+	data := cache.GetSysMetrics()
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		AssertEqual(t, data[0].node, "127.0.0.1", "")
+	}
+
+	// TEST GET APP METRICS - ONLY REACHABLE SERVERS IN DATA
+	data = cache.GetAppMetrics()
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		AssertEqual(t, data[0].node, "127.0.0.1", "")
+	}
+
+	// TEST Ping - ONLY REACHABLE SERVERS IN DATA
+	data = cache.Ping()
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		AssertEqual(t, data[0].node, "127.0.0.1", "")
+	}
 }
